@@ -126,15 +126,15 @@ namespace Worker {
 		public void StartServer(MainForm frm) {
 			_mainForm = frm;
 			try {
-				log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(Path.Combine(Utils.GetApplicationFolder(), "log4net.config")));
+				log4net.Config.XmlConfigurator.ConfigureAndWatch(new FileInfo(Path.Combine(Utils.GetMainFolder(), "log4net.config")));
 			} catch (Exception e) {
-				this.Log(string.Format("Impossibile accedere alla cartella {0}: {1}", Utils.GetApplicationFolder(), e.Message), true);
+				this.Log(string.Format("Impossibile accedere alla cartella {0}: {1}", Utils.GetMainFolder(), e.Message), true);
 				this.Log("Verificare di avere i permessi di scrittura sulla cartella");
 				this.Log("Oppure ripetere l'installazione indicando una cartella diversa");
 				return;
 			}
 			try {
-				_cfg = new ConfigHelper(Path.Combine(Utils.GetApplicationFolder(), "Web.xml"));
+				_cfg = new ConfigHelper(Path.Combine(Utils.GetMainFolder(), "Web.xml"));
 				if (_cfg.ModelloDatabase == "") {
 					this.Log("Mancano le informazioni per accedere al db", true);
 					return;

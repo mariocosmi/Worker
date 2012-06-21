@@ -13,7 +13,11 @@ namespace Worker {
 
 		public static string GetApplicationFolder() {
 			var appPath = Assembly.GetExecutingAssembly().Location;
-			return Path.GetFullPath(Path.Combine(Path.GetDirectoryName(appPath), ".."));
+			return Path.GetDirectoryName(appPath);
+		}
+
+		public static string GetMainFolder() {
+			return Path.GetFullPath(Path.Combine(GetApplicationFolder(), ".."));
 		}
 
 		public static void CheckDatabase(string dbt, string dsn, out bool ok, out string message) {
