@@ -22,6 +22,7 @@ namespace Worker {
 	public partial class MainService : ServiceBase, MyLogger {
 		static protected readonly log4net.ILog Logger = log4net.LogManager.GetLogger(typeof(MainService));
 		System.Threading.Timer _timer = null;
+		System.Threading.Timer minuteTimer = null;
 		ConfigHelper _cfg = null;
 		MainForm _mainForm = null;
 		int _timerInterval;
@@ -41,6 +42,22 @@ namespace Worker {
 				this.Log("Errore in onTimer", ex);
 			}
 			_timer = new Timer(new TimerCallback(this.OnTimer), this, _timerInterval * 1000, Timeout.Infinite);
+		}
+
+		private void OnMinuteTimer(object state) {
+			this.Debug("OnMinuteTimer");
+			if (_mainForm != null)
+				return; // in modalità interattiva viene mostrato l'errore
+			if (!_dbAvviato) {
+				try {
+					Logger.InfoFormat("Sistema non avviato .. tentativo di riavvio");
+					Logger.InfoFormat("DbAvviato = {0}", _dbAvviato ? "OK" : "NOK");
+					StopServer();
+					StartServer();
+				} catch (Exception ex) {
+					Logger.Warn("Errore in OnMinuteTimer", ex);
+				}
+			}
 		}
 
 		#region Logging
@@ -106,6 +123,8 @@ namespace Worker {
 		#region Eventi
 
 		protected override void OnStart(string[] args) {
+			if (minuteTimer == null)
+				minuteTimer = new System.Threading.Timer(new System.Threading.TimerCallback(this.OnMinuteTimer), this, 60000, 60000);
 			StartServer();
 			base.OnStart(args);
 		}
