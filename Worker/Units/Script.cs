@@ -9,21 +9,35 @@ namespace Worker.Units {
 		public override Map Execute(Map input, ServerFacade sf, ConfigHelper cfg, out bool hasMore, out bool cut) {
 			hasMore = cut = false;
 			var text = this.GetString("content");
-			var script = new ScriptEngine();
-			script.References("Solari.Core.dll");
-			script.Using("Solari.Core");
-			script.DeclareGlobal("sf", typeof(ServerFacade), sf);
-			script.DeclareGlobal("cfg", typeof(Map), cfg.Data);
-			script.DeclareGlobal("context", typeof(Map), this);
-			script.DeclareGlobal("hasMore", typeof(bool), false);
-			try {
-				script.SetCode("public Map DoExecute(Map input) { hasMore = false; " + text + " ; return input; }");
-				script.Compile();
-				var ret = script.Execute("DoExecute", input) as Map;
-				hasMore = (bool)script.GlobalGet("hasMore");
-				return ret;
-			} catch (Exception ex) {
-				throw new ScriptingException(ex);
+			var cached = this["cached"] as ScriptEngine;
+			if (cached == null) {
+				var script = new ScriptEngine();
+				script.References("Solari.Core.dll");
+				script.Using("Solari.Core");
+				script.DeclareGlobal("sf", typeof (ServerFacade), sf);
+				script.DeclareGlobal("cfg", typeof (Map), cfg.Data);
+				script.DeclareGlobal("context", typeof (Map), this);
+				script.DeclareGlobal("hasMore", typeof (bool), false);
+				try {
+					script.SetCode("public Map DoExecute(Map input) { hasMore = false; " + text + " ; return input; }");
+					script.Compile();
+					this["cached"] = script;
+					var ret = script.Execute("DoExecute", input) as Map;
+					hasMore = (bool) script.GlobalGet("hasMore");
+					return ret;
+				}
+				catch (Exception ex) {
+					throw new ScriptingException(ex);
+				}
+			} else {
+				var script = cached;
+				try {
+					var ret = script.Execute("DoExecute", input) as Map;
+					hasMore = (bool)script.GlobalGet("hasMore");
+					return ret;
+				} catch (Exception ex) {
+					throw new ScriptingException(ex);
+				}
 			}
 		}
 	}

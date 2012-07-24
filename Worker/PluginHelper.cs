@@ -59,8 +59,20 @@ namespace Worker {
 		#endregion
 
 		public static UnitOfWork GetUnitOfWork(Map map) {
+			var cached = map["cached"] as UnitOfWork;
+			if (cached != null) {
+				Logger.InfoFormat("Trova in cache la UnitOfWork id {0}", cached.Uid);
+				return cached;
+			}
 			var def = _mapPlugins.GetMap(map.GetString("type"));
-			return def == null ? null : (UnitOfWork)(Activator.CreateInstance(def["type"] as Type) as UnitOfWork).Copy(map);
+			if (def == null) {
+				Logger.WarnFormat("Tipo unit sconosciuto {0}", map.GetString("type"));
+				return null;
+			}
+			cached = (UnitOfWork)(Activator.CreateInstance(def["type"] as Type) as UnitOfWork).Copy(map);
+			map["cached"] = cached;
+			Logger.InfoFormat("Mette in cache la UnitOfWork id {0} tipo {1}", cached.Uid, map.GetString("type"));
+			return cached;
 		}
 
 		public static Map Plugins { get { return _mapPlugins; } }

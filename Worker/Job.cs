@@ -10,7 +10,7 @@ namespace Worker {
 		public Jobs(MyLogger logger) {
 			_logger = logger;
 		}
-		private List<Job> _jobs = null;
+		private List<Job> _jobs;
 
 		public void Load(string path) {
 			_jobs = new List<Job>();
@@ -22,7 +22,9 @@ namespace Worker {
 					if (n is XmlElement) {
 						var el = n as XmlElement;
 						var jobId = el.GetAttribute("id");
-						var job = new Job(_logger, jobId);
+						var fromTime = ParseTime(el.GetAttribute("fromtime"));
+						var toTime = ParseTime(el.GetAttribute("totime"));
+						var job = new Job(_logger, jobId, fromTime, toTime);
 						job.Load(el);
 						_jobs.Add(job);
 					}
@@ -34,7 +36,8 @@ namespace Worker {
 				try {
 					sf.BeginTransaction();
 					foreach (var job in _jobs)
-						job.Execute(sf, cfg);
+						if (job.CanExecute)
+							job.Execute(sf, cfg);
 					sf.Commit();
 				} catch (Exception e) {
 					if (sf.Transaction != null)
@@ -43,29 +46,44 @@ namespace Worker {
 				}
 			}
 		}
+
+		private TimeSpan ParseTime(string str) {
+			TimeSpan ret;
+			return TimeSpan.TryParse(str, out ret) ? ret : TimeSpan.Zero;
+		}
 	}
 
 	public class Job {
 		private readonly MyLogger _logger;
 		private readonly string _id;
-		public Job(MyLogger logger, string id) {
+		private readonly TimeSpan _fromTime;
+		private readonly TimeSpan _toTime;
+
+		public Job(MyLogger logger, string id, TimeSpan fromTime, TimeSpan toTime) {
 			_logger = logger;
 			_id = id;
+			_fromTime = fromTime == TimeSpan.Zero? new TimeSpan(0, 0, 0): fromTime;
+			_toTime = toTime == TimeSpan.Zero ? new TimeSpan(23, 59, 59) : toTime;
 		}
-		private ArrayList _units = null;
+		private ArrayList _units;
+
+		public bool CanExecute {
+			get { return DateTime.Now.TimeOfDay > _fromTime && DateTime.Now.TimeOfDay < _toTime; }
+		}
 
 		public void Load(XmlElement el) {
 			_units = new ArrayList();
 			var list = el.SelectNodes("unit");
 			if (list != null)
-				foreach (XmlNode n in list) {
-					var map = new Map();
-					foreach (XmlAttribute a in n.Attributes)
-						map[a.Name] = a.Value;
-					if (n is XmlElement)
-						map["content"] = (n as XmlElement).InnerText;
-					_units.Add(map);
-				}
+				foreach (XmlNode n in list)
+					if (n.Attributes != null) {
+						var map = new Map();
+						foreach (XmlAttribute a in n.Attributes)
+							map[a.Name] = a.Value;
+						if (n is XmlElement)
+							map["content"] = (n as XmlElement).InnerText;
+						_units.Add(map);
+					}
 		}
 
 		public void Execute(ServerFacade sf, ConfigHelper cfg) {
