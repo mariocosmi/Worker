@@ -11,6 +11,7 @@ namespace Worker.Units {
 			var text = this.GetString("content");
 			var cached = this["cached"] as ScriptEngine;
 			if (cached == null) {
+				System.Diagnostics.Debug.WriteLine("Compila script per " + this.Uid);
 				var script = new ScriptEngine();
 				script.References("Solari.Core.dll");
 				script.Using("Solari.Core");
@@ -30,6 +31,7 @@ namespace Worker.Units {
 					throw new ScriptingException(ex);
 				}
 			} else {
+				System.Diagnostics.Debug.WriteLine("Trova in cache script per " + this.Uid);
 				var script = cached;
 				try {
 					var ret = script.Execute("DoExecute", input) as Map;

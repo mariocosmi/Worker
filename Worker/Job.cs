@@ -103,7 +103,7 @@ namespace Worker {
 			if (units.Count == 0) return;
 			var unit = PluginHelper.GetUnitOfWork(units[0] as Map);
 			_logger.Log(string.Format("Inizia l'esecuzione della unit {0}", unit.Label));
-			_logger.Debug(PrettyPrinter.PrettyPrint(input));
+//			_logger.Debug(PrettyPrinter.PrettyPrint(input));
 			bool more;
 			do {
 				bool cut;

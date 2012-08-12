@@ -130,6 +130,7 @@
     <Compile Include="ModelHelper.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="NanoScript.cs" />
     <Compile Include="PersonalSettings.cs">
       <SubType>Code</SubType>
     </Compile>

@@ -93,10 +93,6 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Nanoscript\NanoScript.csproj">
-      <Project>{8AE4E558-43B1-4F5D-B90A-012BCB84BB8C}</Project>
-      <Name>NanoScript</Name>
-    </ProjectReference>
     <ProjectReference Include="..\Solari.Core\Solari.Core.csproj">
       <Project>{3C9F471E-46DD-41EB-8064-64B95228CAE2}</Project>
       <Name>Solari.Core</Name>
