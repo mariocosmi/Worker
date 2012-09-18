@@ -27,6 +27,27 @@ namespace Solari.Core {
 			return this;
 		}
 
+		public Map DeepCopy() {
+			Map ret = new Map();
+			foreach (object k in this.Keys) {
+				object val = this[k];
+				if (val is Map)
+					ret[k] = (val as Map).DeepCopy();
+				else if (val is ArrayList) {
+					ArrayList src = val as ArrayList;
+					ArrayList dst = new ArrayList();
+					foreach (object el in src)
+						if (el is Map)
+							dst.Add((el as Map).DeepCopy());
+						else
+							dst.Add(el);
+					ret[k] = dst;
+				} else
+					ret[k] = val;
+			}
+			return ret;
+		}
+
 		public Map AddMany(params object[] data) {
 			for (int i = 0; i < data.Length - 1; i = i + 2) {
 				if (data[i + 1] != null) 

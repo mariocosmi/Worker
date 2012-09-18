@@ -77,6 +77,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Units\ReadXML.cs" />
+    <Compile Include="Units\ReadJSON.cs" />
     <Compile Include="Units\IfChange.cs" />
     <Compile Include="Units\Mail.cs" />
     <Compile Include="Units\Select.cs" />

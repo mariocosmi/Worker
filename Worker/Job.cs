@@ -107,7 +107,7 @@ namespace Worker {
 			bool more;
 			do {
 				bool cut;
-				var tempData = Map.FromJsonObject(input.ToJson());
+				var tempData = input.DeepCopy();
 				tempData = ExecuteUnit(unit, tempData, sf, cfg, out more, out cut);
 				if (!cut)
 					InternalExecute(new ArrayList(units.GetRange(1, units.Count - 1)), tempData, sf, cfg);
